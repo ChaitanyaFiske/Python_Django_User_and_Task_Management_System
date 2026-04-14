@@ -1,0 +1,115 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+<body>
+  <div class="loader"></div>
+  <div id="app">
+    <section class="section">
+      <div class="container mt-5">
+        <div class="row">
+          <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h4>User Updation</h4>
+              </div>
+<div class="card-body">
+                <form method="POST">
+                    <input type="hidden" value="{{obj.id}}" id="user_id">
+                    <div class="form-group">
+                      <label for="username">Full Name</label>
+                      <input id="username" type="text" class="form-control" name="username" value="{{obj.Name}}" required>
+                    </div>
+                  
+                    <div class="form-group">
+                      <label for="email">Email</label>
+                      <input id="email" type="email" class="form-control" name="email" value="{{obj.email}}" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="mobile">Mobile</label>
+                      <input id="mobile" type="number" class="form-control" name="mobile" value="{{obj.mobile}}" required>
+                    
+                  </div>
+                  
+                    <div class="form-group">
+                      <label for="city">City</label>
+                      <input id="city" type="text" class="form-control" name="city" value="{{obj.city}}" required>
+                    </div>
+                  
+                  
+                  <div class="form-group">
+                    <button type="button" onclick="update_user()" class="btn btn-primary btn-lg btn-block">
+                      Update
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    function update_user(){
+        var username = $("#username").val()
+        var user_id = $("#user_id").val()
+        $("#username").val()
+
+        var city = $("#city").val()
+        var user_id = $("#user_id").val()
+        $("#city").val()
+        
+        var email = $('#email').val()
+        $('#email').val()
+
+        var mobile = $('#mobile').val()
+        $('#mobile').val()
+
+            console.log('Updation is Successfull')
+
+            Swal.fire({
+                title: "User is Updated Successfully",
+                icon: "success",
+                showConfirmButton: false,
+            });
+
+            $.ajax({
+                method: "POST",
+                url: "/update_user/",
+                data: {
+                    "Name":username,
+                    "email":email,
+                    "mobile":mobile,
+                    "city":city,
+                    'user_id':user_id,
+                },
+                success: function(response) {
+                    console.log('Success! Data received:', response.status);
+                    setTimeout(function(){
+                        window.location.href = "/users/";
+                    }, 2000);
+                }
+            }); 
+    }
+
+</script>
+</body>
+</html>
+
+
+
+{% endblock %}

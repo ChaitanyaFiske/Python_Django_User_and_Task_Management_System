@@ -1,0 +1,114 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+
+<body>
+
+<section class="section">
+  <div class="section-body">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h4>Task Details</h4>
+            <div class="text-right mb-0">
+              <a href="/add_task/" class="btn btn-success">
+                Add Task
+              </a>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Table -->
+            <div class="table-responsive">
+              <table class="table table-striped" id="table-1">
+
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Task Name</th>
+                    <th>Task Details</th>
+                    <th>Status</th>
+                    <th>Assign Date</th>
+                    <th>Due Date</th>
+                    <th>Total Days</th>
+                    <th>Completion Date</th>
+                    <th>Completion By</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {% for obj in objs %}
+                  <tr>
+                    <td>{{obj.fk_user.id}}</td>
+                    <td>{{obj.fk_user}}</td>
+                    <td>{{obj.taskname}}</td>
+                    <td>{{obj.taskdetails}}</td>
+                    <td>{{obj.status}}</td>
+                    <td>{{obj.assigndate}}</td>
+                    <td>{{obj.duedate}}</td>
+                    <td>{{obj.totaldays}}</td>
+                    <td>{{obj.completion_date}}</td>
+                    <td>{{obj.remaining_days_display}}</td>
+
+                    <td class="align-middle" style="display : flex">
+                      
+                      <a href="/edit_task/{{obj.id}}/" title="Edit" class="btn btn-primary btn-sm mr-1">
+                        <i class="fas fa-edit"></i>
+                      </a>
+
+                      <button class="btn btn-danger btn-sm" onclick="delete_task('{{obj.id}}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                      </button>
+
+                    </td>                    
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<script>
+function delete_task(user_id){
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $.ajax({
+        method: "POST",
+        url: "/delete_task/",
+        data: {
+          "user_id": user_id
+        },
+        success: function(response){
+          location.reload()
+        }
+      });
+    }
+  });
+}
+
+</script>
+
+{% endblock %}

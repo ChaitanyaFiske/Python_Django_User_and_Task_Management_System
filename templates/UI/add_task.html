@@ -1,0 +1,220 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css" integrity="sha512-O03ntXoVqaGUTAeAmvQ2YSzkCvclZEcPQu1eqloPaHfJ5RuNGiS4l+3duaidD801P50J28EHyonCV06CUlTSag==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  </head>
+
+<body>
+
+<body>
+  <div class="loader"></div>
+  <div id="app">
+    <section class="section">
+      <div class="container mt-5">
+        <div class="row">
+          <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h4>Add New Task</h4>
+              </div>
+              <div class="card-body">
+                <form method="POST">
+                  <div class="row">
+
+                    <div class="form-group col-6">
+                      <label for="fk_user">User</label>
+                      <select name="fk_user" id="fk_user" class="form-control">
+                        <option value="">Select User</option>
+                        {% for user in users %}
+                          <option value="{{user.id}}">{{user.Name}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+
+                    <div class="form-group col-6">
+                      <label for="taskname">Task Name</label>
+                      <input id="taskname" type="text" class="form-control" name="taskname" >
+                    </div>
+
+                  </div>
+
+                  <div class="row">
+
+                    <div class="form-group col-6">
+                      <label for="taskdetails">Task Details</label>
+                      <textarea id="taskdetails" type="text" class="form-control" name="taskdetails"> </textarea>
+                    </div>
+
+                    <div class="form-group col-6">
+                      <label>Status</label>
+                      <select name="status" id="status" class="form-control">
+                        <option value="">Select Status</option>
+                        <option value="Pending">Pending</option>
+                      </select>
+                    </div>
+
+                  </div>
+
+                  <div class="row">
+
+                    <div class="form-group col-6">
+                      <label for="assigndate">Assign Date</label>
+                      <input id="assigndate" type="date" class="form-control" name="assigndate" required>
+                    </div>
+
+                    <div class="form-group col-6">
+                      <label for="duedate">Due Date</label>
+                      <input id="duedate" type="date" class="form-control" name="duedate" required>
+                    </div>
+
+                  </div>
+                  
+                  <div class="form-group">
+                    <button type="button" onclick="gettask()" class="btn btn-primary btn-lg btn-block">
+                      Register
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js" integrity="sha512-Zq9o+E00xhhR/7vJ49mxFNJ0KQw1E1TMWkPTxrWcnpfEFDEXgUiwJHIKit93EW/XxE31HSI5GEOW06G6BF1AtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    function gettask(){
+        var fk_user = $("#fk_user").val()
+        $("#fk_user").val()
+        
+        var taskname = $('#taskname').val()
+        $('#taskname').val()
+
+        var status = $('#status').val()
+        $('#status').val()
+        
+        var password = $('#password').val()
+        $('#password').val()
+
+        var duedate = $('#duedate').val()
+        $('#duedate').val()
+
+        var assigndate = $('#assigndate').val()
+        $('#assigndate').val()
+
+        var taskdetails = $('#taskdetails').val()
+        $('#taskdetails').val()
+
+
+        if (fk_user == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Fk User',
+            timeout:2000
+        });
+        }
+        else if (taskname == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Task Name',
+            timeout:2000
+        });
+        }
+        else if (taskdetails == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Task Details',
+            timeout:2000
+        });
+        }
+        else if (status == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Status',
+            timeout:2000
+        });
+        }
+        else if (password == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Password',
+            timeout:2000
+        });
+        }
+        else if (duedate == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Due Date',
+            timeout:2000
+        });
+        }
+        else if (assigndate == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Assign Date',
+            timeout:2000
+        });
+        }
+        
+
+        else if(duedate < assigndate){
+              iziToast.error({
+                title: 'Error',
+                position: 'topCenter',
+                message: 'Due Date cannot be less than Assign Date',
+                timeout:3000
+              });
+            }
+        
+        
+        else { 
+          $.ajax({
+                method: "POST",
+                url: "/gettask/",
+                data: {
+                    "fk_user":fk_user,
+                    "taskname":taskname,
+                    "taskdetails":taskdetails,
+                    "status":status,
+                    "assigndate":assigndate,
+                    "duedate":duedate,
+                },
+                success: function(response) {
+                    iziToast.success({
+                      title: 'OK',
+                      position: 'topCenter',
+                      message: 'Data Saved Successfully',
+                      timeout:2000
+                  });
+                }
+            });
+          }
+}
+
+
+$(document).ready(function(){
+    var today = new Date().toISOString().split('T')[0];
+
+    $('#assigndate').attr('min', today);
+    $('#duedate').attr('min', today);
+});
+
+$('#assigndate').on('change', function(){
+    var assignDate = $(this).val();
+    $('#duedate').attr('min', assignDate);
+});
+
+
+</script>
+
+{% endblock %}

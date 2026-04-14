@@ -1,0 +1,317 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.db { padding: 20px; background: #ffffff; min-height: 100vh; }
+.sec-title { font-size: 13px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; margin-bottom: 28px; }
+.kpi { background: #f7f7f5; border-radius: 8px; padding: 14px 12px; cursor: pointer; transition: opacity .15s; }
+.kpi:hover { opacity: .75; }
+.kpi-dot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 8px; }
+.kpi-val { font-size: 26px; font-weight: 500; color: #1a1a1a; line-height: 1; }
+.kpi-lbl { font-size: 11px; color: #888; margin-top: 5px; }
+.kpi-chg { font-size: 11px; margin-top: 4px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.card { background: #ffffff; border: 0.5px solid #e0e0dc; border-radius: 12px; padding: 16px; }
+.card-title { font-size: 13px; font-weight: 500; color: #1a1a1a; margin-bottom: 12px; }
+.chart-wrap { position: relative; width: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; font-size: 11px; color: #888; }
+.leg-item { display: flex; align-items: center; gap: 4px; }
+.leg-sq { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.prog-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.prog-lbl { font-size: 12px; color: #888; width: 74px; flex-shrink: 0; }
+.prog-bar-bg { flex: 1; height: 6px; background: #f0f0ec; border-radius: 3px; overflow: hidden; }
+.prog-bar { height: 100%; border-radius: 3px; }
+.prog-val { font-size: 11px; color: #888; width: 34px; text-align: right; flex-shrink: 0; }
+.streak-grid { display: grid; gap: 3px; }
+.streak-cell { aspect-ratio: 1; border-radius: 3px; }
+.team-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 0.5px solid #e8e8e4; }
+.team-row:last-child { border-bottom: none; }
+.team-avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
+.team-name { flex: 1; font-size: 12px; color: #1a1a1a; }
+.team-bar-bg { width: 70px; height: 5px; background: #f0f0ec; border-radius: 3px; overflow: hidden; }
+.team-bar { height: 100%; border-radius: 3px; }
+.team-cnt { font-size: 11px; color: #888; width: 24px; text-align: right; }
+.prio-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid #e8e8e4; font-size: 12px; }
+.prio-row:last-child { border-bottom: none; }
+.badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+.filter-row { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.f-btn { padding: 5px 12px; border-radius: 20px; border: 0.5px solid #d0d0cc; background: #ffffff; color: #888; font-size: 11px; cursor: pointer; transition: all .15s; }
+.f-btn.active { background: #1a1a1a; color: #ffffff; border-color: transparent; }
+</style>
+
+<div class="db">
+
+<div class="filter-row">
+  <button class="f-btn active" onclick="setFilter('all',this)">All time</button>
+  <button class="f-btn" onclick="setFilter('q1',this)">Q1</button>
+  <button class="f-btn" onclick="setFilter('q2',this)">Q2</button>
+  <button class="f-btn" onclick="setFilter('q3',this)">Q3</button>
+  <button class="f-btn" onclick="setFilter('q4',this)">Q4</button>
+</div>
+
+<div class="sec-title">Overview</div>
+<div class="kpi-grid" id="kpi-grid"></div>
+
+<div class="row2">
+  <div class="card">
+    <div class="card-title">Monthly Task Overview</div>
+    <div class="legend" id="leg-dist"></div>
+    <div class="chart-wrap" style="height:200px"><canvas id="distChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Status Overview</div>
+    <div class="chart-wrap" style="height:200px"><canvas id="donutChart"></canvas></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">User Completion %</div>
+
+  <!-- Legend (same style as above card) -->
+  <div class="legend" id="leg-user">
+    <span class="leg-item">
+      <span class="leg-sq" style="background:#50ae90"></span>Excellent (100%)
+    </span>
+    <span class="leg-item">
+      <span class="leg-sq" style="background:#3B8BD4"></span>Good (70%+)
+    </span>
+    <span class="leg-item">
+      <span class="leg-sq" style="background:#EF9F27"></span>Average (40%+)
+    </span>
+    <span class="leg-item">
+      <span class="leg-sq" style="background:#E24B4A"></span>Delayed
+    </span>
+  </div>
+
+  <div class="chart-wrap" style="height:300px">
+    <canvas id="userCompletionChart"></canvas>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const COL = { done:'#1D9E75', proc:'#3B8BD4', pend:'#EF9F27', notdone:'#E24B4A', total:'#7F77DD' };
+const RAW = {{ chart_data|safe }};
+const QMAP = { q1:[0,1,2], q2:[3,4,5], q3:[6,7,8], q4:[9,10,11] };
+let currentFilter = 'all';
+function getIdxs(){ return currentFilter==='all'?MONTHS.map((_,i)=>i):QMAP[currentFilter]; }
+function slice(arr){ return getIdxs().map(i=>arr[i]); }
+function sumSlice(arr){ return slice(arr).reduce((a,b)=>a+b,0); }
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  refreshAll();
+}
+
+function buildKPI(){
+  const total=sumSlice(RAW.total),done=sumSlice(RAW.done),proc=sumSlice(RAW.proc),
+        pend=sumSlice(RAW.pend),nd=sumSlice(RAW.notdone);
+  const items=[
+    {col:COL.total,val:total,lbl:'Total tasks',  chg:''},
+    {col:COL.done, val:done, lbl:'Completed',    chg:''},
+    {col:COL.notdone,val:nd, lbl:'Not done',     chg:''},
+    {col:COL.proc, val:proc, lbl:'Processing',   chg:''},
+    {col:COL.pend, val:pend, lbl:'Pending',      chg:''},
+  ];
+  document.getElementById('kpi-grid').innerHTML=items.map(k=>`
+    <div class="kpi" onclick="sendPrompt('Tell me more about ${k.lbl} tasks')">
+      <div class="kpi-dot" style="background:${k.col}"></div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-lbl">${k.lbl}</div>
+      <div class="kpi-chg" style="color:${k.chg.startsWith('+')?'#1D9E75':'#E24B4A'}">${k.chg}</div>
+    </div>`).join('');
+}
+
+let charts={};
+function mkLegend(id,items){
+  document.getElementById(id).innerHTML=items.map(i=>
+    `<span class="leg-item"><span class="leg-sq" style="background:${i.c}"></span>${i.l}</span>`).join('');
+}
+function mkChart(id,cfg){
+  if(charts[id]){charts[id].destroy();}
+  charts[id]=new Chart(document.getElementById(id),cfg);
+}
+const baseOpts=(stacked=false)=>({
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:'#fff',titleColor:'#1a1a1a',bodyColor:'#555',borderColor:'#e0e0dc',borderWidth:1}},
+  scales:{
+    x:{stacked,grid:{display:false},ticks:{color:'#aaa',font:{size:10},maxRotation:0}},
+    y:{stacked,grid:{color:'rgba(0,0,0,.05)'},ticks:{color:'#aaa',font:{size:10}}}
+  }
+});
+
+function buildDist(){
+  mkLegend('leg-dist',[{c:COL.done,l:'Completed'},{c:COL.proc,l:'Processing'},{c:COL.pend,l:'Pending'},{c:COL.notdone,l:'Not done'}]);
+  mkChart('distChart',{type:'bar',data:{labels:slice(MONTHS),datasets:[
+    {label:'Completed', data:slice(RAW.done),    backgroundColor:COL.done+'CC',stack:'s'},
+    {label:'Processing',data:slice(RAW.proc),    backgroundColor:COL.proc+'CC',stack:'s'},
+    {label:'Pending',   data:slice(RAW.pend),    backgroundColor:COL.pend+'CC',stack:'s'},
+    {label:'Not done',  data:slice(RAW.notdone), backgroundColor:COL.notdone+'CC',stack:'s'},
+  ]},options:{...baseOpts(true)}});
+}
+
+function buildComp(){
+  const rate=getIdxs().map(i=>Math.round(RAW.done[i]/RAW.total[i]*100));
+  mkLegend('leg-comp',[{c:COL.done,l:'Completion %'}]);
+  mkChart('compChart',{type:'line',data:{labels:slice(MONTHS),datasets:[{
+    label:'Completion %',data:rate,borderColor:COL.done,backgroundColor:COL.done+'22',
+    fill:true,tension:.4,pointRadius:3,pointHoverRadius:5,borderWidth:2
+  }]},options:{...baseOpts(),scales:{
+    x:{grid:{display:false},ticks:{color:'#aaa',font:{size:10},maxRotation:0}},
+    y:{min:50,max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{color:'#aaa',font:{size:10},callback:v=>v+'%'}}
+  }}});
+}
+
+function buildStatus(){
+  mkLegend('leg-status',[{c:COL.proc,l:'Processing'},{c:COL.pend,l:'Pending'},{c:COL.notdone,l:'Not done'}]);
+  mkChart('statusChart',{type:'bar',data:{labels:slice(MONTHS),datasets:[
+    {label:'Processing',data:slice(RAW.proc),    backgroundColor:COL.proc+'CC',borderRadius:2},
+    {label:'Pending',   data:slice(RAW.pend),    backgroundColor:COL.pend+'CC',borderRadius:2},
+    {label:'Not done',  data:slice(RAW.notdone), backgroundColor:COL.notdone+'CC',borderRadius:2},
+  ]},options:{...baseOpts(false)}});
+}
+
+function buildTrend(){
+  mkLegend('leg-trend',[{c:COL.done,l:'Completed'},{c:COL.pend,l:'Pending'}]);
+  mkChart('trendChart',{type:'line',data:{labels:slice(MONTHS),datasets:[
+    {label:'Completed',data:slice(RAW.done),borderColor:COL.done,backgroundColor:'transparent',tension:.4,borderWidth:2,pointRadius:2},
+    {label:'Pending',  data:slice(RAW.pend),borderColor:COL.pend,backgroundColor:'transparent',tension:.4,borderWidth:2,pointRadius:2,borderDash:[4,3]},
+  ]},options:{...baseOpts()}});
+}
+
+function buildDonut(){
+  const done=sumSlice(RAW.done),proc=sumSlice(RAW.proc),
+        pend=sumSlice(RAW.pend),nd=sumSlice(RAW.notdone);
+  const total=done+proc+pend+nd;
+  const pct=v=>Math.round(v/total*100)+'%';
+  mkChart('donutChart',{type:'doughnut',data:{
+    labels:[`Done ${pct(done)}`,`Processing ${pct(proc)}`,`Pending ${pct(pend)}`,`Not done ${pct(nd)}`],
+    datasets:[{data:[done,proc,pend,nd],
+      backgroundColor:[COL.done+'CC',COL.proc+'CC',COL.pend+'CC',COL.notdone+'CC'],
+      borderWidth:0,hoverOffset:6}]
+  },options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+    plugins:{legend:{display:true,position:'right',labels:{color:'#555',font:{size:10},boxWidth:9,padding:8}},
+    tooltip:{backgroundColor:'#fff',titleColor:'#1a1a1a',bodyColor:'#555',borderColor:'#e0e0dc',borderWidth:1}}}});
+}
+
+function refreshAll(){
+  buildKPI(); buildDist(); buildDonut(); buildUserCompletionChart();
+}
+
+
+const USER_DATA = {{ user_task_data|safe }};
+
+// % Calculation
+function calculateCompletionPercent(assign, due, completed) {
+    const assignDate = new Date(assign);
+    const dueDate = new Date(due);
+    const completedDate = new Date(completed);
+
+    const totalDays = (dueDate - assignDate) / (1000 * 60 * 60 * 24);
+
+    if (totalDays <= 0) return 100;
+
+    if (completedDate <= dueDate) {
+        return 100;
+    } else {
+        const delayDays = (completedDate - dueDate) / (1000 * 60 * 60 * 24);
+        const lossPercent = (delayDays / totalDays) * 100;
+
+        return Math.max(0, Math.round(100 - lossPercent));
+    }
+}
+
+// Prepare grouped data (important!)
+const userMap = {};
+
+USER_DATA.forEach(task => {
+    const percent = calculateCompletionPercent(
+        task.assign_date,
+        task.due_date,
+        task.completed_date
+    );
+
+    if (!userMap[task.username]) {
+        userMap[task.username] = [];
+    }
+
+    userMap[task.username].push(percent);
+});
+
+// Average % per user
+const userNames = Object.keys(userMap);
+const completionPercents = userNames.map(user => {
+    const arr = userMap[user];
+    return Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
+});
+
+// Build Chart
+function buildUserCompletionChart() {
+    if (charts['userCompletionChart']) {
+        charts['userCompletionChart'].destroy();
+    }
+
+    charts['userCompletionChart'] = new Chart(
+        document.getElementById('userCompletionChart'),
+        {
+            type: 'bar',
+            data: {
+                labels: userNames,
+                datasets: [{
+                    label: 'Completion %',
+                    data: completionPercents,
+                    barThickness: 45,        // width
+                    maxBarThickness: 50,     // prevents large bars
+                    categoryPercentage: 0.5, // spacing between categories
+                    barPercentage: 0.6,      // actual bar width
+                    backgroundColor: completionPercents.map(p => 
+                        p > 80 ? '#1D9E75' : p > 50 ? '#EF9F27' : '#E24B4A'
+                    )
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                return ctx.raw + '% completion';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#888' }
+                    },
+                    y: {
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            callback: v => v + '%',
+                            color: '#888'
+                        }
+                    }
+                }
+            }
+        }
+    );
+}
+
+refreshAll();
+
+</script>
+
+
+
+{% endblock %}

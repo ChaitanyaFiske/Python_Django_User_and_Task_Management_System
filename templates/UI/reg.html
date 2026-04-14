@@ -1,0 +1,237 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- Mirrored from radixtouch.in/templates/admin/zivi/source/light/auth-register.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 11 Jul 2020 10:28:56 GMT -->
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+  <title>Zivi - Registration</title>
+  <!-- General CSS Files -->
+  <link rel="stylesheet" href="{% static 'assets/css/app.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/bundles/jquery-selectric/selectric.css' %}">
+  <!-- Template CSS -->
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/components.css' %}">
+  <!-- Custom style CSS -->
+  <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
+  <link rel='shortcut icon' type='image/x-icon' href="{% static 'assets/img/favicon.ico' %}" />
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css" integrity="sha512-O03ntXoVqaGUTAeAmvQ2YSzkCvclZEcPQu1eqloPaHfJ5RuNGiS4l+3duaidD801P50J28EHyonCV06CUlTSag==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+</head>
+
+<body>
+  <div class="loader"></div>
+  <div id="app">
+    <section class="section">
+      <div class="container mt-5">
+        <div class="row">
+          <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h4>Registeration</h4>
+              </div>
+              <div class="card-body">
+                <form method="POST">
+                    <div class="form-group">
+                      <label for="username">Full Name</label>
+                      <input id="username" type="text" class="form-control" name="username" required>
+                    </div>
+                  <div class="row">
+                    <div class="form-group col-6">
+                      <label for="email">Email</label>
+                      <input id="email" type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="form-group col-6">
+                      <label for="mobile">Mobile</label>
+                      <input id="mobile" type="number" class="form-control" name="mobile" required>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-6">
+                      <label for="password" class="d-block">Password</label>
+                      <input id="password" type="password" class="form-control pwstrength" data-indicator="pwindicator"
+                        name="password" required>
+                      <div id="pwindicator" class="pwindicator">
+                        <div class="bar"></div>
+                        <div class="label"></div>
+                      </div>
+                    </div>
+                    <div class="form-group col-6">
+                      <label for="city">City</label>
+                      <input id="city" type="text" class="form-control" name="city" required>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" name="agree" class="custom-control-input" id="agree" required>
+                      <label class="custom-control-label" for="agree">I agree with the terms and conditions</label>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <button type="button" onclick="getdata()" class="btn btn-primary btn-lg btn-block">
+                      Register
+                    </button>
+                  </div>
+                </form>
+              </div>
+              <div class="mb-4 text-muted text-center">
+                Already Registered? <a href="/login/">Login</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js" integrity="sha512-Zq9o+E00xhhR/7vJ49mxFNJ0KQw1E1TMWkPTxrWcnpfEFDEXgUiwJHIKit93EW/XxE31HSI5GEOW06G6BF1AtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    function getdata(){
+        var username = $("#username").val()
+        $("#username").val()
+        
+        var email = $('#email').val()
+        $('#email').val()
+        
+        var password = $('#password').val()
+        $('#password').val()
+
+        var city = $('#city').val()
+        $('#city').val()
+
+        var mobile = $('#mobile').val()
+        $('#mobile').val()
+
+        if (username == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Full Name',
+            timeout:2000
+        });
+        }
+        else if (email == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Email',
+            timeout:2000
+        });
+        }
+        else if (mobile == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Mobile',
+            timeout:2000
+        });
+        }
+        else if (password == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter Password',
+            timeout:2000
+        });
+        }
+        else if (city == ''){
+          iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Enter City',
+            timeout:2000
+        });
+        }
+
+        // 1. Minimum length
+        else if (password.length < 8) {
+            iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Password must be at least 8 characters long',
+            timeout:2000
+        });
+            return false;
+        }
+
+        // 2. First character must be capital
+        else if (!/^[A-Z]/.test(password)) {
+            iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'First character must be a capital Alphabet',
+            timeout:2000
+        });
+            return false;
+        }
+
+        // 3. At least one special character
+        else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Password must contain at least one special character',
+            timeout:2000
+        });
+            return false;
+        }
+
+        // 4. At least one number
+        else if (!/[0-9]/.test(password)) {
+            iziToast.error({
+            title: 'Error',
+            position: 'topCenter',
+            message: 'Password must contain at least one number',
+            timeout:2000
+        });
+            return false;
+        }
+        else{
+          $.ajax({
+                method: "POST",
+                url: "/getdata/",
+                data: {
+                    "Name":username,
+                    "email":email,
+                    "mobile":mobile,
+                    "password":password,
+                    "city":city,
+                },
+                success: function(response) {
+                    // Code to run on successful request
+                    iziToast.success({
+                      title: 'OK',
+                      position: 'topCenter',
+                      message: 'Data Saved Successfully',
+                      timeout:2000
+                  });
+                    // Update the DOM, run other functions, etc.
+                }
+            });
+        }
+      }
+
+</script>
+
+  <!-- General JS Scripts -->
+  <script src="{% static 'assets/js/app.min.js' %}"></script>
+  <!-- JS Libraies -->
+  <script src="{% static 'assets/bundles/jquery-pwstrength/jquery.pwstrength.min.js' %}"></script>
+  <script src="{% static 'assets/bundles/jquery-selectric/jquery.selectric.min.js' %}"></script>
+  <!-- Page Specific JS File -->
+  <script src="{% static 'assets/js/page/auth-register.js' %}"></script>
+  <!-- Template JS File -->
+  <script src="{% static 'assets/js/scripts.js' %}"></script>
+  <!-- Custom JS File -->
+  <script src="{% static 'assets/js/custom.js' %}"></script>
+</body>
+
+
+<!-- Mirrored from radixtouch.in/templates/admin/zivi/source/light/auth-register.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 11 Jul 2020 10:28:57 GMT -->
+</html>

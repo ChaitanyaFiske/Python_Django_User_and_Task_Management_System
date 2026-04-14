@@ -1,0 +1,200 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css" integrity="sha512-O03ntXoVqaGUTAeAmvQ2YSzkCvclZEcPQu1eqloPaHfJ5RuNGiS4l+3duaidD801P50J28EHyonCV06CUlTSag==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+<body>
+  <div class="loader"></div>
+  <div id="app">
+    <section class="section">
+      <div class="container mt-5">
+        <div class="row">
+          <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h4>Task Updation</h4>
+              </div>
+
+              <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" value="{{obj.id}}" id="user_id">
+
+                    <div class="form-group">
+                      <label for="fk_user">User</label>
+                      <input class="form-control" value="{{ obj.fk_user.Name }}" readonly>
+                      <input type="hidden" id="fk_user" class="form-control" name="fk_user" value="{{obj.fk_user.id}}" readonly>
+                    </div>
+                  
+                    <div class="form-group">
+                      <label for="taskname">Task Name</label>
+                      <input id="taskname" type="text" class="form-control" name="taskname" value="{{obj.taskname}}" required>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="taskdetails">Task Details</label>
+                      <textarea id="taskdetails" class="form-control" name="taskdetails">{{obj.taskdetails}}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                      <label>Status</label>
+                      <select id="status" name="status" class="form-control">
+                        <option value="Pending" {% if obj.status == "Pending" %}selected{% endif %}>Pending</option>
+                        <option value="Processing" {% if obj.status == "Processing" %}selected{% endif %}>Processing</option>
+                        <option value="Completed" {% if obj.status == "Completed" %}selected{% endif %}>Completed</option>
+                        <option value="Not Done" {% if obj.status == "Not Done" %}selected{% endif %}>Not Done</option>
+                      </select>
+                    </div>
+                  
+                    <div class="form-group">
+                      <label for="assigndate">Assign Date</label>
+                      <input id="assigndate" type="date" class="form-control" name="assigndate" value="{{obj.assigndate|date:'Y-m-d'}}" required>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="duedate">Due Date</label>
+                      <input id="duedate" type="date" class="form-control" name="duedate" value="{{obj.duedate|date:'Y-m-d'}}" required>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="completion_date">Completion Date</label>
+                      <input id="completion_date" type="date" class="form-control" name="completion_date" value="{{obj.completion_date|date:'Y-m-d'}}">
+                    </div>
+                  
+                  
+                  <div class="form-group">
+                    <button id="updateBtn" type="button" onclick="update_task()" class="btn btn-primary btn-lg btn-block">Update</button>
+                  </div>
+                </form>
+              </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js" integrity="sha512-Zq9o+E00xhhR/7vJ49mxFNJ0KQw1E1TMWkPTxrWcnpfEFDEXgUiwJHIKit93EW/XxE31HSI5GEOW06G6BF1AtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    function update_task(){
+
+    // 🔥 Show instant loading
+    $("#updateBtn").prop("disabled", true).text("Updating...");
+
+    var fk_user = $("#fk_user").val()
+    var user_id = $("#user_id").val()
+    var status = $("#status").val()
+    var taskname = $('#taskname').val()
+    var taskdetails = $('#taskdetails').val()
+    var assigndate = $('#assigndate').val()
+    var duedate = $('#duedate').val()
+    var completion_date = $('#completion_date').val()
+    $('#completion_date').val()
+
+    // ✅ Validation
+    if(duedate < assigndate){
+        iziToast.error({
+            title: 'Error',
+            message: 'Due Date cannot be less than Assign Date',
+            position: 'topCenter'
+        });
+
+        $("#updateBtn").prop("disabled", false).text("Update");
+        return;
+    }
+
+    if(status === "Completed" && assigndate > completion_date && completion_date == ''){
+        iziToast.error({
+            title: 'Error',
+            message: 'Either Completion Date field is empty or it it less than Assign Date',
+            position: 'topCenter'
+        });
+
+        $("#updateBtn").prop("disabled", false).text("Update");
+        return;
+    }
+
+    $.ajax({
+        method: "POST",
+        url: "/update_task/",
+        data: {
+            fk_user,
+            taskname,
+            taskdetails,
+            status,
+            assigndate,
+            duedate,
+            "completion_date":completion_date,
+            user_id
+        },
+        success: function(response) {
+
+            iziToast.success({
+                title: 'Success',
+                message: 'Task Updated Successfully',
+                position: 'topCenter',
+                timeout: 1500
+            });
+
+            setTimeout(function(){
+                window.location.href = "/tasks/";
+            }, 1200);
+        },
+        error: function() {
+            iziToast.error({
+                title: 'Error',
+                message: 'Server error!',
+                position: 'topCenter'
+            });
+
+            $("#updateBtn").prop("disabled", false).text("Update");
+        }
+    });
+}
+  
+  
+$(document).ready(function(){
+    var today = new Date().toISOString().split('T')[0];
+
+    $('#assigndate').attr('min', today);
+    $('#duedate').attr('min', today);
+});
+
+$('#assigndate').on('change', function(){
+    var assignDate = $(this).val();
+    $('#duedate').attr('min', assignDate);
+});
+
+function toggleCompletionDate() {
+    var status = $('#status').val();
+
+    if (status === "Completed") {
+        $('#completion_date').prop('readonly', false);
+        $('#completion_date').prop('required', true);
+    } else {
+        $('#completion_date').prop('readonly', true);
+        $('#completion_date').val(""); // optional: clear value
+        $('#completion_date').prop('required', false);
+    }
+}
+
+// Run on page load
+$(document).ready(function(){
+    toggleCompletionDate();
+});
+
+// Run when status changes
+$('#status').on('change', function(){
+    toggleCompletionDate();
+});
+
+
+</script>
+</body>
+</html>
+
+{% endblock %}
+
