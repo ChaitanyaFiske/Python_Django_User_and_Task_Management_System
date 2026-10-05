@@ -10,15 +10,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
 
   redis:
     image: redis:7
     container_name: task-management-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
 
   web:
     build: .
