@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - develop
+      - chaitanya
   pull_request:
     branches:
       - main
       - develop
+      - chaitanya
 
 jobs:
   test:
