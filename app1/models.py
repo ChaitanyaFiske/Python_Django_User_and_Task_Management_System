@@ -6,7 +6,7 @@ from datetime import datetime, date
 class user_detail(models.Model):
     Name = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
-    mobile = models.IntegerField(null=True, blank=True)
+    mobile = models.CharField(max_length=15, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
     password = models.CharField(max_length=100, null=True, blank=True)
 

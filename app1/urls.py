@@ -36,5 +36,5 @@ urlpatterns = [
     path('api/gettask/', views.gettask),
     path('tasks/', views.tasks),
     path('api/updatetask/', views.updatetask),
-    path('api/getdata/', views.getdata),
+    path('api/getdata/', views.create_user_api),
 ]

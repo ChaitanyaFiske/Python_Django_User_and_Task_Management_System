@@ -16,8 +16,9 @@ from rest_framework import status
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
-
+from django.core.cache import cache
 from .models import user_detail, task_detail
+from .tasks import send_task_email
 
 # Create your views here.
 
@@ -61,40 +62,39 @@ def updatetask(request):
             completion_date = None
 
         obj.save()
+        cache.delete("task_dashboard_data")
 
         user = obj.fk_user
         if user.email and obj.status != 'Completed' :
 
-            send_mail(
-                subject="Task Updated",
+            send_task_email.delay(
+                subject="Updated Task",
                 message=f"""Hello {user.Name},
-                User ID: {obj.fk_user_id}
+                User ID: {user.id}
                 Task ID: {obj.id}
-                Your task has been updated successfully.
+                Your Task has been Updated.
+
                 Task Name: {obj.taskname}
                 Details: {obj.taskdetails}
                 Assign Date: {obj.assigndate}
                 Due Date: {obj.duedate}
                 Status: {obj.status}""",
-                from_email="chaitanyafiske2001@gmail.com",
-                recipient_list=[user.email],
-                fail_silently=False,
+                    recipient_email=user.email,
             )
 
         else :
-            send_mail(
+            send_task_email.delay(
                 subject="Task Completed",
                 message=f"""Hello {user.Name},
-                User ID: {obj.fk_user_id}
+                User ID: {user.id}
                 Task ID: {obj.id}
-                Your task has been Completed successfully.
+                Your Task has been Completed Successfully.
+
                 Task Name: {obj.taskname}
                 Details: {obj.taskdetails}
                 Completion Date: {obj.completion_date}
                 Status: {obj.status}""",
-                from_email="chaitanyafiske2001@gmail.com",
-                recipient_list=[user.email],
-                fail_silently=False,
+                    recipient_email=user.email,
             )
         
         return Response({"message": "Task updated successfully and Email sent"},status=status.HTTP_200_OK)
@@ -147,6 +147,7 @@ def deletetask(request, task_id):
         
         task = task_detail.objects.get(id=task_id)
         task.delete()
+        cache.delete("task_dashboard_data")
 
         return Response({"message": "Task deleted successfully"},status=status.HTTP_200_OK)
 
@@ -172,21 +173,21 @@ def gettask(request):
         assigndate=datetime.strptime(data.get('assigndate'), "%Y-%m-%d").date(),
         duedate=datetime.strptime(data.get('duedate'), "%Y-%m-%d").date()
     )
+    cache.delete("task_dashboard_data")
     if user.email:
-        send_mail(
+        send_task_email.delay(
             subject="New Task Assigned",
             message=f"""Hello {user.Name},
-            User ID: {user.id}
-            Task ID: {task.id}
-            You have been assigned a new task.
-            Task Name: {task.taskname}
-            Details: {task.taskdetails}
-            Assign Date: {task.assigndate}
-            Due Date: {task.duedate}
-            Status: {task.status}""",
-            from_email="chaitanyafiske2001@gmail.com",
-            recipient_list=[user.email],
-            fail_silently=False,
+    User ID: {user.id}
+    Task ID: {task.id}
+    You have been assigned a new task.
+
+    Task Name: {task.taskname}
+    Details: {task.taskdetails}
+    Assign Date: {task.assigndate}
+    Due Date: {task.duedate}
+    Status: {task.status}""",
+            recipient_email=user.email,
         )
 
     return Response(
@@ -196,7 +197,7 @@ def gettask(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def getdata(request):
+def create_user_api(request):
     data = request.data
 
     required_fields = ['Name', 'email', 'mobile', 'city', 'password']
@@ -303,22 +304,22 @@ def gettask(request):
         assigndate=datetime.strptime(data.get('assigndate'), "%Y-%m-%d").date(),
         duedate=datetime.strptime(data.get('duedate'), "%Y-%m-%d").date()
     )
+    cache.delete("task_dashboard_data")
 
     if user.email:
-        send_mail(
+        send_task_email.delay(
             subject="New Task Assigned",
             message=f"""Hello {user.Name},
-            User ID: {user.id}
-            Task ID: {task.id}
-            You have been assigned a new task.
-            Task Name: {task.taskname}
-            Details: {task.taskdetails}
-            Assign Date: {task.assigndate}
-            Due Date: {task.duedate}
-            Status: {task.status}""",
-            from_email="chaitanyafiske2001@gmail.com",
-            recipient_list=[user.email],
-            fail_silently=False,
+    User ID: {user.id}
+    Task ID: {task.id}
+    You have been assigned a new task.
+
+    Task Name: {task.taskname}
+    Details: {task.taskdetails}
+    Assign Date: {task.assigndate}
+    Due Date: {task.duedate}
+    Status: {task.status}""",
+            recipient_email=user.email,
         )
 
     return JsonResponse({"status": 200})
@@ -384,7 +385,7 @@ def update_user(request) :
         obj.mobile = data['mobile']
         obj.city = data['city']
 
-        if not obj.email.lower().endswith('@gmail.com'):
+        if not obj.email.lower().endswith('@gmail.com' and "@yopmail.com"):
             return JsonResponse({"error": "Email Format Error"},status=400)
         else :
             obj.save()
@@ -434,38 +435,37 @@ def update_task(request) :
             obj.completion_date = None
 
         obj.save()
+        cache.delete("task_dashboard_data")
 
         if user.email and obj.status != 'Completed':
-            send_mail(
+            send_task_email.delay(
                 subject="Updated Task",
                 message=f"""Hello {user.Name},
                 User ID: {user.id}
                 Task ID: {obj.id}
                 Your Task has been Updated.
+
                 Task Name: {obj.taskname}
                 Details: {obj.taskdetails}
                 Assign Date: {obj.assigndate}
                 Due Date: {obj.duedate}
                 Status: {obj.status}""",
-                from_email="chaitanyafiske2001@gmail.com",
-                recipient_list=[user.email],
-                fail_silently=False,
+                    recipient_email=user.email,
             )
 
         else :
-            send_mail(
+            send_task_email.delay(
                 subject="Task Completed",
                 message=f"""Hello {user.Name},
                 User ID: {user.id}
                 Task ID: {obj.id}
                 Your Task has been Completed Successfully.
+
                 Task Name: {obj.taskname}
                 Details: {obj.taskdetails}
                 Completion Date: {obj.completion_date}
                 Status: {obj.status}""",
-                from_email="chaitanyafiske2001@gmail.com",
-                recipient_list=[user.email],
-                fail_silently=False,
+                    recipient_email=user.email,
             )
 
         return JsonResponse({"status":200})
@@ -520,19 +520,28 @@ import json
 @login_required
 @csrf_exempt
 def dashboard(request):
-    
+    cache_key = "task_dashboard_data"
+
+    cached_data = cache.get(cache_key)
+
+    if cached_data is not None:
+        return render(
+            request,
+            'UI/dashboard.html',
+            cached_data
+        )
+
     tasks = task_detail.objects.select_related('fk_user').all()
 
-    # -------- Existing Monthly Data --------
     monthly_data = {
-        "total": [0]*12,
-        "done": [0]*12,
-        "proc": [0]*12,
-        "pend": [0]*12,
-        "notdone": [0]*12,
+        "total": [0] * 12,
+        "done": [0] * 12,
+        "proc": [0] * 12,
+        "pend": [0] * 12,
+        "notdone": [0] * 12,
     }
 
-    user_task_data = [] 
+    user_task_data = []
 
     for task in tasks:
         if not task.assigndate:
@@ -546,11 +555,12 @@ def dashboard(request):
 
             if task.completion_date and task.duedate:
                 user_task_data.append({
-                    "username": task.fk_user.Name,   # from your model :contentReference[oaicite:1]{index=1}
-                    "assign_date": task.assigndate.strftime('%Y-%m-%d'),
-                    "due_date": task.duedate.strftime('%Y-%m-%d'),
-                    "completed_date": task.completion_date.strftime('%Y-%m-%d'),
+                    "username": task.fk_user.Name,
+                    "assign_date": task.assigndate.strftime("%Y-%m-%d"),
+                    "due_date": task.duedate.strftime("%Y-%m-%d"),
+                    "completed_date": task.completion_date.strftime("%Y-%m-%d"),
                 })
+
         elif task.status == "Processing":
             monthly_data["proc"][month] += 1
 
@@ -562,10 +572,17 @@ def dashboard(request):
 
     context = {
         "chart_data": json.dumps(monthly_data),
-        "user_task_data": json.dumps(user_task_data)   # ADD THIS
+        "user_task_data": json.dumps(user_task_data),
     }
 
-    return render(request, 'UI/dashboard.html', context)
+    # Cache dashboard data for 5 minutes
+    cache.set(cache_key, context, timeout=300)
+
+    return render(
+        request,
+        "UI/dashboard.html",
+        context
+    )
 
 def add_task(request) :
     users = user_detail.objects.all()
@@ -661,7 +678,7 @@ def login(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def getdata(request):
+def create_user_api(request):
     data = request.data
 
     required_fields = ['Name', 'email', 'mobile', 'city', 'password']
@@ -691,3 +708,4 @@ def getdata(request):
         },
         status=status.HTTP_201_CREATED
     )
+
