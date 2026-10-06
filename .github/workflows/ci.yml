@@ -6,6 +6,7 @@ on:
       - main
       - develop
       - chaitanya
+
   pull_request:
     branches:
       - main
@@ -51,3 +52,51 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t task-management-app:ci .
+
+  deploy:
+    name: Deploy to EC2
+    needs: test
+    if: github.ref == 'refs/heads/chaitanya' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-south-1
+
+      - name: Deploy to EC2 through SSM
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+              "cd ~/Python_Django_User_and_Task_Management_System",
+              "git pull --ff-only origin chaitanya",
+              "docker compose up -d --build",
+              "docker compose ps"
+            ]' \
+            --query "Command.CommandId" \
+            --output text)
+
+          echo "SSM Command ID: $COMMAND_ID"
+
+          aws ssm wait command-executed \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ secrets.EC2_INSTANCE_ID }}"
+
+          echo "Deployment completed successfully."
+
+          aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
+            --query "StandardOutputContent" \
+            --output text
