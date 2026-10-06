@@ -29,7 +29,10 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['admintaskmanager.duckdns.org',
+    '3.7.140.54',
+    'localhost',
+    '127.0.0.1',]
 
 
 # Application definition
@@ -184,3 +187,10 @@ CELERY_TIMEZONE = "Asia/Kolkata"
 CELERY_BEAT_SCHEDULER = (
     "django_celery_beat.schedulers:DatabaseScheduler"
 )
+
+# Production security settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://admintaskmanager.duckdns.org',
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
