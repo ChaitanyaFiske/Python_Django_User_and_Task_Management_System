@@ -79,10 +79,7 @@ jobs:
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
-              "cd ~/Python_Django_User_and_Task_Management_System",
-              "git pull --ff-only origin chaitanya",
-              "docker compose up -d --build",
-              "docker compose ps"
+              "sudo -u ec2-user bash -lc '\''cd /home/ec2-user/Python_Django_User_and_Task_Management_System && git pull --ff-only origin chaitanya && docker compose up -d --build && docker compose ps'\''"
             ]' \
             --query "Command.CommandId" \
             --output text)
