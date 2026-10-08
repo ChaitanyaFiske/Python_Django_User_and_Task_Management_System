@@ -1,0 +1,18 @@
+Hello {{ user_name }},
+
+Your task has been updated.
+
+TASK DETAILS
+------------
+
+Task ID: {{ task_id }}
+Task Name: {{ task_name }}
+Details: {{ task_details }}
+Assign Date: {{ assign_date }}
+Due Date: {{ due_date }}
+Status: {{ status }}
+
+Please log in to the Task Management System to view the latest task information.
+
+This is an automated notification.
+Please do not reply directly to this email.

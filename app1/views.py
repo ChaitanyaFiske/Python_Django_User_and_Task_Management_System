@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -65,37 +66,21 @@ def updatetask(request):
         cache.delete("task_dashboard_data")
 
         user = obj.fk_user
-        if user.email and obj.status != 'Completed' :
-
-            send_task_email.delay(
-                subject="Updated Task",
-                message=f"""Hello {user.Name},
-                User ID: {user.id}
-                Task ID: {obj.id}
-                Your Task has been Updated.
-
-                Task Name: {obj.taskname}
-                Details: {obj.taskdetails}
-                Assign Date: {obj.assigndate}
-                Due Date: {obj.duedate}
-                Status: {obj.status}""",
-                    recipient_email=user.email,
-            )
-
-        else :
-            send_task_email.delay(
-                subject="Task Completed",
-                message=f"""Hello {user.Name},
-                User ID: {user.id}
-                Task ID: {obj.id}
-                Your Task has been Completed Successfully.
-
-                Task Name: {obj.taskname}
-                Details: {obj.taskdetails}
-                Completion Date: {obj.completion_date}
-                Status: {obj.status}""",
-                    recipient_email=user.email,
-            )
+        if user.email:
+            if obj.status == "Completed":
+                transaction.on_commit(
+                    lambda: send_task_email.delay(
+                        task_id=obj.id,
+                        event_type="completed",
+                    )
+                )
+            else:
+                transaction.on_commit(
+                    lambda: send_task_email.delay(
+                        task_id=obj.id,
+                        event_type="updated",
+                    )
+                )
         
         return Response({"message": "Task updated successfully and Email sent"},status=status.HTTP_200_OK)
 
@@ -175,19 +160,11 @@ def gettask(request):
     )
     cache.delete("task_dashboard_data")
     if user.email:
-        send_task_email.delay(
-            subject="New Task Assigned",
-            message=f"""Hello {user.Name},
-    User ID: {user.id}
-    Task ID: {task.id}
-    You have been assigned a new task.
-
-    Task Name: {task.taskname}
-    Details: {task.taskdetails}
-    Assign Date: {task.assigndate}
-    Due Date: {task.duedate}
-    Status: {task.status}""",
-            recipient_email=user.email,
+        transaction.on_commit(
+            lambda: send_task_email.delay(
+                task_id=task.id,
+                event_type="created",
+            )
         )
 
     return Response(
@@ -307,20 +284,12 @@ def gettask(request):
     cache.delete("task_dashboard_data")
 
     if user.email:
-        send_task_email.delay(
-            subject="New Task Assigned",
-            message=f"""Hello {user.Name},
-    User ID: {user.id}
-    Task ID: {task.id}
-    You have been assigned a new task.
-
-    Task Name: {task.taskname}
-    Details: {task.taskdetails}
-    Assign Date: {task.assigndate}
-    Due Date: {task.duedate}
-    Status: {task.status}""",
-            recipient_email=user.email,
+        transaction.on_commit(
+        lambda: send_task_email.delay(
+            task_id=task.id,
+            event_type="created",
         )
+    )
 
     return JsonResponse({"status": 200})
 
@@ -437,36 +406,21 @@ def update_task(request) :
         obj.save()
         cache.delete("task_dashboard_data")
 
-        if user.email and obj.status != 'Completed':
-            send_task_email.delay(
-                subject="Updated Task",
-                message=f"""Hello {user.Name},
-                User ID: {user.id}
-                Task ID: {obj.id}
-                Your Task has been Updated.
-
-                Task Name: {obj.taskname}
-                Details: {obj.taskdetails}
-                Assign Date: {obj.assigndate}
-                Due Date: {obj.duedate}
-                Status: {obj.status}""",
-                    recipient_email=user.email,
-            )
-
-        else :
-            send_task_email.delay(
-                subject="Task Completed",
-                message=f"""Hello {user.Name},
-                User ID: {user.id}
-                Task ID: {obj.id}
-                Your Task has been Completed Successfully.
-
-                Task Name: {obj.taskname}
-                Details: {obj.taskdetails}
-                Completion Date: {obj.completion_date}
-                Status: {obj.status}""",
-                    recipient_email=user.email,
-            )
+        if user.email:
+            if obj.status == "Completed":
+                transaction.on_commit(
+                    lambda: send_task_email.delay(
+                        task_id=obj.id,
+                        event_type="completed",
+                    )
+                )
+            else:
+                transaction.on_commit(
+                    lambda: send_task_email.delay(
+                        task_id=obj.id,
+                        event_type="updated",
+                    )
+                )
 
         return JsonResponse({"status":200})
 

@@ -1,0 +1,17 @@
+Hello {{ user_name }},
+
+Your task has been completed successfully.
+
+TASK DETAILS
+------------
+
+Task ID: {{ task_id }}
+Task Name: {{ task_name }}
+Details: {{ task_details }}
+Completion Date: {{ completion_date }}
+Status: {{ status }}
+
+Thank you.
+
+This is an automated notification.
+Please do not reply directly to this email.

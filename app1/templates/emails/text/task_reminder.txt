@@ -1,0 +1,17 @@
+Hello {{ user_name }},
+
+This is a reminder that your task is due tomorrow.
+
+TASK DETAILS
+------------
+
+Task ID: {{ task_id }}
+Task Name: {{ task_name }}
+Details: {{ task_details }}
+Due Date: {{ due_date }}
+Status: {{ status }}
+
+Please complete the task before the due date.
+
+This is an automated notification.
+Please do not reply directly to this email.
