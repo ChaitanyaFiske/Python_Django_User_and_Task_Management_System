@@ -354,7 +354,7 @@ def update_user(request) :
         obj.mobile = data['mobile']
         obj.city = data['city']
 
-        if not obj.email.lower().endswith('@gmail.com' and "@yopmail.com"):
+        if not obj.email.lower().endswith('@gmail.com', "@yopmail.com"):
             return JsonResponse({"error": "Email Format Error"},status=400)
         else :
             obj.save()
